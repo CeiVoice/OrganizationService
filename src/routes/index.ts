@@ -294,12 +294,20 @@ router.get("/organization/:id", async (req: Request, res: Response) => {
 // Update organization
 router.put("/organization/:id", async (req: Request, res: Response) => {
     try {
+        const token = req.header("Authorization")?.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "Authorization header is required" });
+        }
+        const decoded: any = jwt.decode(token);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: "Invalid or missing user in token" });
+        }
         const id = Number(req.params.id);
         if (isNaN(id)) {
             return res.status(400).json({ error: "Invalid organization id" });
         }
         const data = req.body;
-        const result = await OrganizationController.UpdateOrg(id, data);
+        const result = await OrganizationController.UpdateOrg(id, decoded.id, data);
         return res.json({ ok: true, result });
     } catch (err) {
         return res.status(500).json({ error: "Internal server error", details: err instanceof Error ? err.message : err });
@@ -348,11 +356,19 @@ router.put("/organization/:id", async (req: Request, res: Response) => {
 // Delete organization
 router.delete("/organization/:id", async (req: Request, res: Response) => {
     try {
+        const token = req.header("Authorization")?.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "Authorization header is required" });
+        }
+        const decoded: any = jwt.decode(token);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: "Invalid or missing user in token" });
+        }
         const id = Number(req.params.id);
         if (isNaN(id)) {
             return res.status(400).json({ error: "Invalid organization id" });
         }
-        const result = await OrganizationController.DeleteOrg(id);
+        const result = await OrganizationController.DeleteOrg(id, decoded.id);
         return res.json({ ok: true, result });
     } catch (err) {
         return res.status(500).json({ error: "Internal server error", details: err instanceof Error ? err.message : err });
@@ -637,12 +653,20 @@ router.get("/member/org/:orgId", async (req: Request, res: Response) => {
  */
 router.put("/member/:id", async (req: Request, res: Response) => {
     try {
+        const token = req.header("Authorization")?.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "Authorization header is required" });
+        }
+        const decoded: any = jwt.decode(token);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: "Invalid or missing user in token" });
+        }
         const id = Number(req.params.id);
         if (isNaN(id)) {
             return res.status(400).json({ error: "Invalid member id" });
         }
         const data = req.body;
-        const result = await MemberController.UpdateMember(id, data);
+        const result = await MemberController.UpdateMember(id, decoded.id, data);
         return res.json({ ok: true, result });
     } catch (err) {
         return res.status(500).json({ error: "Internal server error", details: err instanceof Error ? err.message : err });
@@ -690,11 +714,19 @@ router.put("/member/:id", async (req: Request, res: Response) => {
  */
 router.delete("/member/:id", async (req: Request, res: Response) => {
     try {
+        const token = req.header("Authorization")?.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "Authorization header is required" });
+        }
+        const decoded: any = jwt.decode(token);
+        if (!decoded || !decoded.id) {
+            return res.status(401).json({ error: "Invalid or missing user in token" });
+        }
         const id = Number(req.params.id);
         if (isNaN(id)) {
             return res.status(400).json({ error: "Invalid member id" });
         }
-        const result = await MemberController.DeleteMember(id);
+        const result = await MemberController.DeleteMember(id, decoded.id);
         return res.json({ ok: true, result });
     } catch (err) {
         return res.status(500).json({ error: "Internal server error", details: err instanceof Error ? err.message : err });

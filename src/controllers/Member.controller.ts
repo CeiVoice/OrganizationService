@@ -49,11 +49,39 @@ const GetMemberByOrgId = async (orgId: number) => {
     return await Member.findMemberByOrgId(orgId)
 }
 
-const UpdateMember = async (id: number, data: UpdateMemberPayload) => {
+const UpdateMember = async (id: number, requestingUserId: number, data: UpdateMemberPayload) => {
+    const targetMember = await Member.findMemberById(id)
+    if (!targetMember) {
+        throw new Error("Member not found")
+    }
+
+    const requestingMember = await Member.findMemberByUserIdAndOrgId(Number(requestingUserId), Number(targetMember.OrganizationId))
+    if (!requestingMember) {
+        throw new Error("You are not a member of this organization")
+    }
+
+    if (!requestingMember.isAdmin && requestingMember.UserId !== targetMember.UserId) {
+        throw new Error("Only admins or the account owner can update this member")
+    }
+
     return await Member.UpdateMemberById(id, data)
 }
 
-const DeleteMember = async (id: number) => {
+const DeleteMember = async (id: number, requestingUserId: number) => {
+    const targetMember = await Member.findMemberById(id)
+    if (!targetMember) {
+        throw new Error("Member not found")
+    }
+
+    const requestingMember = await Member.findMemberByUserIdAndOrgId(Number(requestingUserId), Number(targetMember.OrganizationId))
+    if (!requestingMember) {
+        throw new Error("You are not a member of this organization")
+    }
+
+    if (!requestingMember.isAdmin && requestingMember.UserId !== targetMember.UserId) {
+        throw new Error("Only admins or the account owner can delete this member")
+    }
+
     return await Member.DeleteMemberById(id)
 }
 

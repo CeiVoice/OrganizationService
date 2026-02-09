@@ -1,5 +1,6 @@
 import CreateOrg from "../services/CreateOrg";
 import Organization from "../models/Organization";
+import Member from "../models/Member";
 
 
 interface payload{
@@ -16,11 +17,40 @@ const GetOrgById = async (id: number) => {
     return await Organization.findOrgById(id)
 }
 
-const UpdateOrg = async (id: number, data: Partial<{ Orgname: string }>) => {
+const UpdateOrg = async (id: number, requestingUserId: number, data: Partial<{ Orgname: string }>) => {
+
+    const org = await Organization.findOrgById(id)
+    if (!org) {
+        throw new Error("Organization not found")
+    }
+
+    const requestingMember = await Member.findMemberByUserIdAndOrgId(requestingUserId, id)
+    if (!requestingMember) {
+        throw new Error("You are not a member of this organization")
+    }
+
+    if (!requestingMember.isAdmin) {
+        throw new Error("Only admins can update this organization")
+    }
+
     return await Organization.UpdateOrgById(id, data as any)
 }
 
-const DeleteOrg = async (id: number) => {
+const DeleteOrg = async (id: number, requestingUserId: number) => {
+    const org = await Organization.findOrgById(id)
+    if (!org) {
+        throw new Error("Organization not found")
+    }
+
+    const requestingMember = await Member.findMemberByUserIdAndOrgId(requestingUserId, id)
+    if (!requestingMember) {
+        throw new Error("You are not a member of this organization")
+    }
+
+    if (!requestingMember.isAdmin) {
+        throw new Error("Only admins can delete this organization")
+    }
+
     return await Organization.DeleteOrgById(id)
 }
 
