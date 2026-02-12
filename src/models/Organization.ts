@@ -1,7 +1,7 @@
 import supabase from "../config/supabase";
 
 
-export interface Ogranization {
+export interface Organization {
     id: number;
     Orgname: string;
     CreateAt: string;
@@ -17,7 +17,7 @@ const CreateOrg = async (Orgname: string) =>{
         .single();
 
     if (error) throw error;
-    return row as Ogranization;
+    return row as Organization;
 }
 
 const findOrgById = async (id: number) =>{
@@ -28,10 +28,10 @@ const findOrgById = async (id: number) =>{
         .single();
 
     if (error) throw error;
-    return row as Ogranization;
+    return row as Organization;
 }
 
-const UpdateOrgById = async (id:number, data:Ogranization) =>{
+const UpdateOrgById = async (id:number, data:Organization) =>{
     const { data: row, error } = await supabase
         .from("Organization")
         .update({ ...data, UpdateAt: new Date().toISOString() })
@@ -40,7 +40,7 @@ const UpdateOrgById = async (id:number, data:Ogranization) =>{
         .single();
 
     if (error) throw error;
-    return row as Ogranization;    
+    return row as Organization;    
 }
 
 const DeleteOrgById = async (id:number) =>{
