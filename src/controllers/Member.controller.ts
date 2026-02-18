@@ -38,15 +38,19 @@ const CreateNewMember = async (payload: CreateMemberPayload) => {
 }
 
 const GetMemberById = async (id: number) => {
-    return await Member.findMemberById(id)
+    const member = await Member.findMemberById(id);
+    if (!member) {
+        throw new Error("Member not found");
+    }
+    return member;
 }
 
 const GetMemberByUserId = async (userId: number) => {
-    return await Member.findMemberByUserId(userId)
+    return await Member.findMemberByUserId(userId);
 }
 
 const GetMemberByOrgId = async (orgId: number) => {
-    return await Member.findMemberByOrgId(orgId)
+    return await Member.findMemberByOrgId(orgId);
 }
 
 const UpdateMember = async (id: number, requestingUserId: number, data: UpdateMemberPayload) => {
@@ -64,7 +68,11 @@ const UpdateMember = async (id: number, requestingUserId: number, data: UpdateMe
         throw new Error("Only admins or the account owner can update this member")
     }
 
-    return await Member.UpdateMemberById(id, data)
+    const updatedMember = await Member.UpdateMemberById(id, data);
+    if (!updatedMember) {
+        throw new Error("Member not found or could not be updated");
+    }
+    return updatedMember;
 }
 
 const DeleteMember = async (id: number, requestingUserId: number) => {

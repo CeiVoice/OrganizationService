@@ -26,37 +26,38 @@ const CreateMember= async (OrganizationId: number, UserId: number, isAdmin: Bool
     return row as Member;
 }
 
-const findMemberById = async (id: number) =>{
+const findMemberById = async (id: number) => {
     const { data: row, error } = await supabase
         .from("Member")
         .select("*")
         .eq("id", id)
         .single();
 
-    if (error) throw error;
+    if (error) {
+        if (error.code === 'PGRST116') return null; // No rows found
+        throw error;
+    }
     return row as Member;
 }
 
-const findMemberByUserId = async (id: number) =>{
-    const { data: row, error } = await supabase
+const findMemberByUserId = async (id: number) => {
+    const { data: rows, error } = await supabase
         .from("Member")
         .select("*")
-        .eq("UserId", id)
-        .single();
+        .eq("UserId", id);
 
     if (error) throw error;
-    return row as Member;
+    return rows as Member[];
 }
 
-const findMemberByOrgId = async (id: number) =>{
-    const { data: row, error } = await supabase
+const findMemberByOrgId = async (id: number) => {
+    const { data: rows, error } = await supabase
         .from("Member")
         .select("*")
-        .eq("OrganizationId", id)
-        .single();
+        .eq("OrganizationId", id);
 
     if (error) throw error;
-    return row as Member;
+    return rows as Member[];
 }
 
 const findMemberByUserIdAndOrgId = async (userId: number, orgId: number) =>{
@@ -74,7 +75,7 @@ const findMemberByUserIdAndOrgId = async (userId: number, orgId: number) =>{
     return row as Member;
 }
 
-const UpdateMemberById = async (id:number, data:Partial<Member>) =>{
+const UpdateMemberById = async (id:number, data:Partial<Member>) => {
     const { data: row, error } = await supabase
         .from("Member")
         .update({ ...data })
@@ -82,7 +83,10 @@ const UpdateMemberById = async (id:number, data:Partial<Member>) =>{
         .select("*")
         .single();
 
-    if (error) throw error;
+    if (error) {
+        if (error.code === 'PGRST116') return null; // No rows found
+        throw error;
+    }
     return row as Member;    
 }
 

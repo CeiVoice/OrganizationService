@@ -20,18 +20,21 @@ const CreateOrg = async (Orgname: string) =>{
     return row as Organization;
 }
 
-const findOrgById = async (id: number) =>{
+const findOrgById = async (id: number) => {
     const { data: row, error } = await supabase
         .from("Organization")
         .select("*")
         .eq("id", id)
         .single();
 
-    if (error) throw error;
+    if (error) {
+        if (error.code === 'PGRST116') return null; // No rows found
+        throw error;
+    }
     return row as Organization;
 }
 
-const UpdateOrgById = async (id:number, data:Organization) =>{
+const UpdateOrgById = async (id:number, data:Organization) => {
     const { data: row, error } = await supabase
         .from("Organization")
         .update({ ...data, UpdateAt: new Date().toISOString() })
@@ -39,7 +42,10 @@ const UpdateOrgById = async (id:number, data:Organization) =>{
         .select("*")
         .single();
 
-    if (error) throw error;
+    if (error) {
+        if (error.code === 'PGRST116') return null; // No rows found
+        throw error;
+    }
     return row as Organization;    
 }
 

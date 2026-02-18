@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import OrganizationController from '../controllers/Organization.controller';
 import MemberController from '../controllers/Member.controller';
 import jwt from "jsonwebtoken"
+import { authenticateToken, ensureOwnUser } from '../middleware';
 
 /**
  * @swagger
@@ -236,6 +237,59 @@ router.get("/organization/:id", async (req: Request, res: Response) => {
         if (!result) {
             return res.status(404).json({ error: "Organization not found" });
         }
+        return res.json({ ok: true, result });
+    } catch (err) {
+        return res.status(500).json({ error: "Internal server error", details: err instanceof Error ? err.message : err });
+    }
+});
+
+/**
+ * @swagger
+ * /organization/user/{userId}:
+ *   get:
+ *     tags:
+ *       - Organizations
+ *     summary: Get Organizations by User ID
+ *     description: Retrieve all organizations that a user is a member of
+ *     parameters:
+ *       - name: userId
+ *         in: path
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Organizations retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   example: true
+ *                 result:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Organization'
+ *       400:
+ *         description: Invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get("/organization/user/:userId", async (req: Request, res: Response) => {
+    try {
+        const userId = Number(req.params.userId);
+        if (isNaN(userId)) {
+            return res.status(400).json({ error: "Invalid user id" });
+        }
+        const result = await OrganizationController.GetOrgsByUserId(userId);
         return res.json({ ok: true, result });
     } catch (err) {
         return res.status(500).json({ error: "Internal server error", details: err instanceof Error ? err.message : err });
@@ -532,12 +586,9 @@ router.get("/member/:id", async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get("/member/user/:userId", async (req: Request, res: Response) => {
+router.get("/member/user/:userId", authenticateToken, ensureOwnUser, async (req: Request, res: Response) => {
     try {
         const userId = Number(req.params.userId);
-        if (isNaN(userId)) {
-            return res.status(400).json({ error: "Invalid user id" });
-        }
         const result = await MemberController.GetMemberByUserId(userId);
         return res.json({ ok: true, result });
     } catch (err) {

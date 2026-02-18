@@ -17,6 +17,33 @@ const GetOrgById = async (id: number) => {
     return await Organization.findOrgById(id)
 }
 
+const GetOrgsByUserId = async (userId: number) => {
+    // Get all memberships for the user
+    const members = await Member.findMemberByUserId(userId);
+    
+    if (!members || members.length === 0) {
+        return [];
+    }
+
+    // Get the organizations for all the memberships
+    const organizationIds = members.map(member => Number(member.OrganizationId));
+    const organizations = [];
+    
+    for (const orgId of organizationIds) {
+        try {
+            const org = await Organization.findOrgById(orgId);
+            if (org) {
+                organizations.push(org);
+            }
+        } catch (error) {
+            // Continue if organization not found
+            console.warn(`Organization with ID ${orgId} not found`);
+        }
+    }
+    
+    return organizations;
+}
+
 const UpdateOrg = async (id: number, requestingUserId: number, data: Partial<{ Orgname: string }>) => {
 
     const org = await Organization.findOrgById(id)
@@ -54,4 +81,4 @@ const DeleteOrg = async (id: number, requestingUserId: number) => {
     return await Organization.DeleteOrgById(id)
 }
 
-export default { CreateNewOrg, GetOrgById, UpdateOrg, DeleteOrg }
+export default { CreateNewOrg, GetOrgById, GetOrgsByUserId, UpdateOrg, DeleteOrg }
