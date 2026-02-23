@@ -46,7 +46,16 @@ const GetMemberById = async (id: number) => {
 }
 
 const GetMemberByUserId = async (userId: number) => {
-    return await Member.findMemberByUserId(userId);
+    const members = await Member.findMemberByUserId(userId);
+    return await Promise.all(
+        members.map(async (member) => {
+            const org = await Organization.findOrgById(Number(member.OrganizationId));
+            return {
+                ...member,
+                OrgName: org?.Orgname ?? null
+            };
+        })
+    );
 }
 
 const GetMemberByOrgId = async (orgId: number) => {
