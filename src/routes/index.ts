@@ -73,16 +73,21 @@ import { authenticateToken, ensureOwnUser } from '../middleware';
  *       type: object
  *       required:
  *         - OrganizationId
- *         - UserId
+ *         - email
  *       properties:
  *         OrganizationId:
  *           type: integer
  *           description: Organization ID
  *           example: 1
- *         UserId:
- *           type: integer
- *           description: User ID to add as member
- *           example: 1
+ *         email:
+ *           type: string
+ *           description: Email of user to add as member
+ *           example: "user@example.com"
+ *         isAdmin:
+ *           type: boolean
+ *           description: Admin privileges for the member
+ *           example: false
+ *           default: false
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -481,9 +486,9 @@ router.post("/member", async (req: Request, res: Response) => {
         const rawPayload = req.body;
         const payload = {
             "OrganizationId": rawPayload.OrganizationId,
-            "UserId": rawPayload.UserId,
+            "email": rawPayload.email,
             "Admin": decoded.id,
-            "isAdmin": decoded.isAdmin
+            "isAdmin": rawPayload.isAdmin
         }
         const result = await MemberController.CreateNewMember(payload);
         return res.json({ ok: true, result });

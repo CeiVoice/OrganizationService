@@ -1,10 +1,11 @@
 import Member from "../models/Member";
 import Organization from "../models/Organization";
+import User from "../models/User";
 
 interface CreateMemberPayload {
     OrganizationId: string,
-    UserId: string,
-    Admin:string,
+    email: string,
+    Admin: string,
     isAdmin?: boolean
 }
 
@@ -29,12 +30,18 @@ const CreateNewMember = async (payload: CreateMemberPayload) => {
         throw new Error("User is not an admin of this organization")
     }
 
-    const ExistingMember = await Member.findMemberByUserIdAndOrgId(Number(payload.UserId), Number(payload.OrganizationId))
+    // Look up user by email
+    const newUser = await User.findUserByEmail(payload.email)
+    if (!newUser){
+        throw new Error("User with this email does not exist")
+    }
+
+    const ExistingMember = await Member.findMemberByUserIdAndOrgId(Number(newUser.id), Number(payload.OrganizationId))
     if (ExistingMember){
         throw new Error("User is already a member of this organization")
     }
 
-    return await Member.CreateMember(Number(payload.OrganizationId), Number(payload.UserId), payload.isAdmin)
+    return await Member.CreateMember(Number(payload.OrganizationId), Number(newUser.id), payload.isAdmin)
 }
 
 const GetMemberById = async (id: number) => {
