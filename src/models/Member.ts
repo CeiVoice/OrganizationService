@@ -53,11 +53,11 @@ const findMemberByUserId = async (id: number) => {
 const findMemberByOrgId = async (id: number) => {
     const { data: rows, error } = await supabase
         .from("Member")
-        .select("*")
+        .select("*, User(id, Email)")
         .eq("OrganizationId", id);
 
     if (error) throw error;
-    return rows as Member[];
+    return rows as (Member & { User?: { id: number; Email: string } })[];
 }
 
 const findMemberByUserIdAndOrgId = async (userId: number, orgId: number) =>{
